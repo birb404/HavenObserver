@@ -7,8 +7,9 @@ set "OBS_DIR=C:\Program Files\obs-studio\bin\64bit"
 tasklist /FI "IMAGENAME eq obs64.exe" 2>NUL | find /I "obs64.exe" >NUL
 if not errorlevel 1 (
     echo OBS Studio is already running.
-    timeout /t 2 /nobreak >NUL
-    exit /b 0
+    echo Close OBS and run this file again so automatic recording can start reliably.
+    pause
+    exit /b 1
 )
 
 if not exist "%OBS_EXE%" (
@@ -23,6 +24,6 @@ if not exist "%OBS_EXE%" (
     exit /b 1
 )
 
-echo Starting OBS Studio for a HavenObserver capture...
-start "" /D "%OBS_DIR%" "%OBS_EXE%"
+echo Starting OBS Studio and recording the WOW Retail scene...
+start "" /D "%OBS_DIR%" "%OBS_EXE%" --profile "HavenObserver" --collection "Untitled" --scene "WOW Retail" --startrecording
 exit /b 0

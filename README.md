@@ -5,9 +5,10 @@ BFA-HavenCore. It does not use GM commands or the HavenCore server bridge.
 
 ## Recording
 
-Double-click `Start-HavenObserver-OBS.bat` in the addon folder to launch the
-installed OBS Studio. It intentionally does not start recording automatically,
-so the user can confirm the correct OBS profile and scene first.
+Close OBS, then double-click `Start-HavenObserver-OBS.bat` in the addon folder.
+It launches OBS with profile `HavenObserver`, collection `Untitled`, scene
+`WOW Retail`, and starts recording immediately. Click HavenObserver's
+`RECORD 5 MIN` button as soon as WoW regains focus.
 
 1. Enable friendly and enemy nameplates.
 2. Place the camera where the complete event is visible and keep it fixed.
