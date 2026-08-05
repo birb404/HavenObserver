@@ -45,6 +45,7 @@ Copy that file together with the original video for analysis.
 ## Limitations
 
 Retail does not expose arbitrary NPC world coordinates through `UnitPosition`.
-HavenObserver therefore records player world/map position and camera-relative
-nameplate movement. Nameplate tracks are meaningful only while the camera stays
-fixed and the relevant nameplates remain enabled and visible.
+Retail 12 also forbids third-party access to Blizzard-owned nameplate frames,
+so HavenObserver does not read their screen coordinates. It records safe unit
+tokens, GUID/NPC IDs, visibility, targets, health, casts, combat and dialogue;
+the simultaneous video is the authoritative movement record.

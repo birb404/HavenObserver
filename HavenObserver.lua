@@ -3,12 +3,10 @@ local ADDON_NAME = ...
 local Observer = CreateFrame("Frame")
 local MAX_DURATION = 300
 local SAMPLE_INTERVAL = 0.20
-local MOVE_THRESHOLD_SQ = 4.0
 
 local recording
 local sampleElapsed = 0
 local visibleUnits = {}
-local lastScreenPosition = {}
 local RecorderPanel
 
 local function Plain(value)
@@ -81,6 +79,24 @@ local function UnitSnapshot(unit)
     }
 end
 
+local function TrackNameplateUnit(unit)
+    if type(unit) ~= "string" or not UnitExists(unit) then
+        return
+    end
+
+    local snapshot = UnitSnapshot(unit)
+    if snapshot and visibleUnits[unit] ~= snapshot.guid then
+        visibleUnits[unit] = snapshot.guid
+        Add("NPC_VISIBLE", snapshot)
+    end
+end
+
+local function DiscoverNameplates()
+    for index = 1, 40 do
+        TrackNameplateUnit("nameplate" .. index)
+    end
+end
+
 local function PlayerPosition()
     local worldY, worldX, worldZ, instanceID = UnitPosition("player")
     local mapID = C_Map.GetBestMapForUnit("player")
@@ -109,42 +125,8 @@ local function Sample()
         return
     end
 
+    DiscoverNameplates()
     Add("PLAYER_POSITION", PlayerPosition())
-
-    for unit, guid in pairs(visibleUnits) do
-        if UnitExists(unit) and UnitGUID(unit) == guid then
-            local plate = C_NamePlate.GetNamePlateForUnit(unit)
-            if plate then
-                local ok, x, y = pcall(plate.GetCenter, plate)
-                if ok and type(x) == "number" and type(y) == "number" then
-                    local previous = lastScreenPosition[guid]
-                    local moved = not previous
-                    if previous then
-                        local dx, dy = x - previous.x, y - previous.y
-                        moved = dx * dx + dy * dy >= MOVE_THRESHOLD_SQ
-                    end
-
-                    if moved then
-                        lastScreenPosition[guid] = { x = x, y = y }
-                        local health, healthMax = UnitHealth(unit), UnitHealthMax(unit)
-                        local healthPct
-                        if not (issecretvalue and (issecretvalue(health) or issecretvalue(healthMax))) and healthMax > 0 then
-                            healthPct = math.floor(health / healthMax * 1000 + 0.5) / 10
-                        end
-
-                        Add("NPC_SCREEN_POSITION", {
-                            guid = guid,
-                            npcId = NpcID(guid),
-                            name = Plain(UnitName(unit)),
-                            x = math.floor(x * 10 + 0.5) / 10,
-                            y = math.floor(y * 10 + 0.5) / 10,
-                            healthPct = healthPct,
-                        })
-                    end
-                end
-            end
-        end
-    end
 
     recording.samples = recording.samples + 1
     if Now() >= MAX_DURATION then
@@ -160,7 +142,7 @@ function Observer:Start()
 
     HavenObserverDB = HavenObserverDB or { sessions = {} }
     recording = {
-        version = "0.1.0",
+        version = "0.1.1",
         started = date("%Y-%m-%d %H:%M:%S"),
         startedAt = GetTime(),
         realm = GetRealmName(),
@@ -170,11 +152,11 @@ function Observer:Start()
         events = {},
     }
     visibleUnits = {}
-    lastScreenPosition = {}
     sampleElapsed = 0
 
     Add("RECORD_START", PlayerPosition())
-    print("|cff58c6ffHavenObserver:|r RECORDING for up to five minutes. Keep the camera fixed for useful NPC screen tracks.")
+    DiscoverNameplates()
+    print("|cff58c6ffHavenObserver:|r RECORDING for up to five minutes. Video provides movement; the addon records safe NPC unit events.")
 end
 
 function Observer:Stop(reason)
@@ -192,7 +174,6 @@ function Observer:Stop(reason)
         #HavenObserverDB.sessions, recording.duration, #recording.events))
     recording = nil
     visibleUnits = {}
-    lastScreenPosition = {}
 end
 
 BINDING_HEADER_HAVENOBSERVER = "Haven Observer"
@@ -229,11 +210,7 @@ Observer:SetScript("OnEvent", function(self, event, ...)
 
     if event == "NAME_PLATE_UNIT_ADDED" then
         local unit = ...
-        local snapshot = UnitSnapshot(unit)
-        if snapshot then
-            visibleUnits[unit] = snapshot.guid
-            Add("NPC_VISIBLE", snapshot)
-        end
+        TrackNameplateUnit(unit)
     elseif event == "NAME_PLATE_UNIT_REMOVED" then
         local unit = ...
         local guid = visibleUnits[unit] or Plain(UnitGUID(unit))
@@ -310,7 +287,11 @@ SlashCmdList.HAVENOBSERVER = function(input)
         print("|cff58c6ffHavenObserver:|r mark added: " .. (rest ~= "" and rest or "mark"))
     elseif command == "status" then
         if recording then
-            print(string.format("|cff58c6ffHavenObserver:|r recording %.1fs, %d events, %d visible nameplates.", Now(), #recording.events, #C_NamePlate.GetNamePlates()))
+            local visibleCount = 0
+            for _ in pairs(visibleUnits) do
+                visibleCount = visibleCount + 1
+            end
+            print(string.format("|cff58c6ffHavenObserver:|r recording %.1fs, %d events, %d visible nameplates.", Now(), #recording.events, visibleCount))
         else
             print(string.format("|cff58c6ffHavenObserver:|r idle; %d saved sessions.", HavenObserverDB and #HavenObserverDB.sessions or 0))
         end
