@@ -8,7 +8,7 @@ BFA-HavenCore. It does not use GM commands or the HavenCore server bridge.
 1. Enable friendly and enemy nameplates.
 2. Place the camera where the complete event is visible and keep it fixed.
 3. Start OBS recording.
-4. Run `/ho record`.
+4. Click `RECORD 5 MIN` on the recorder panel, or run `/ho record`.
 5. Add synchronisation markers with `/ho mark portal wave`, etc.
 6. Wait up to five minutes or run `/ho stop`.
 7. Run `/reload` or log out to flush SavedVariables to disk.
@@ -26,6 +26,8 @@ Copy that file together with the original video for analysis.
 - `/ho mark <text>`
 - `/ho status`
 - `/ho clear`
+- `/ho show`
+- `/ho hide`
 
 ## Limitations
 

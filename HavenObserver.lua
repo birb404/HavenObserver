@@ -9,6 +9,7 @@ local recording
 local sampleElapsed = 0
 local visibleUnits = {}
 local lastScreenPosition = {}
+local RecorderPanel
 
 local function Plain(value)
     if value == nil then
@@ -309,7 +310,77 @@ SlashCmdList.HAVENOBSERVER = function(input)
             HavenObserverDB.sessions = {}
             print("|cff58c6ffHavenObserver:|r saved sessions cleared.")
         end
+    elseif command == "show" then
+        RecorderPanel:Show()
+    elseif command == "hide" then
+        RecorderPanel:Hide()
     else
-        print("|cff58c6ffHavenObserver:|r /ho record | stop | mark <text> | status | clear")
+        print("|cff58c6ffHavenObserver:|r /ho record | stop | mark <text> | status | clear | show | hide")
     end
 end
+
+local function CreateButton(parent, text, width, onClick)
+    local button = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+    button:SetSize(width, 24)
+    button:SetText(text)
+    button:SetScript("OnClick", onClick)
+    return button
+end
+
+RecorderPanel = CreateFrame("Frame", "HavenObserverRecorderPanel", UIParent, "BackdropTemplate")
+RecorderPanel:SetSize(310, 92)
+RecorderPanel:SetPoint("CENTER", UIParent, "CENTER", 0, 220)
+RecorderPanel:SetMovable(true)
+RecorderPanel:EnableMouse(true)
+RecorderPanel:RegisterForDrag("LeftButton")
+RecorderPanel:SetScript("OnDragStart", RecorderPanel.StartMoving)
+RecorderPanel:SetScript("OnDragStop", RecorderPanel.StopMovingOrSizing)
+RecorderPanel:SetClampedToScreen(true)
+RecorderPanel:SetBackdrop({
+    bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+    edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+    edgeSize = 12,
+    insets = { left = 3, right = 3, top = 3, bottom = 3 },
+})
+RecorderPanel:SetBackdropColor(0.02, 0.04, 0.06, 0.94)
+
+local title = RecorderPanel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+title:SetPoint("TOPLEFT", 12, -10)
+title:SetText("HAVEN OBSERVER")
+
+local status = RecorderPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+status:SetPoint("TOPRIGHT", -12, -14)
+status:SetText("IDLE")
+
+local recordButton = CreateButton(RecorderPanel, "RECORD 5 MIN", 105, function() Observer:Start() end)
+recordButton:SetPoint("BOTTOMLEFT", 10, 12)
+
+local stopButton = CreateButton(RecorderPanel, "STOP", 80, function() Observer:Stop("panel") end)
+stopButton:SetPoint("LEFT", recordButton, "RIGHT", 5, 0)
+
+local markButton = CreateButton(RecorderPanel, "MARK", 80, function()
+    Add("USER_MARK", { text = "panel mark", player = PlayerPosition() })
+    print("|cff58c6ffHavenObserver:|r panel mark added.")
+end)
+markButton:SetPoint("LEFT", stopButton, "RIGHT", 5, 0)
+
+local panelElapsed = 0
+RecorderPanel:SetScript("OnUpdate", function(_, elapsed)
+    panelElapsed = panelElapsed + elapsed
+    if panelElapsed < 0.20 then
+        return
+    end
+    panelElapsed = 0
+
+    if recording then
+        status:SetFormattedText("|cffff4040REC|r %05.1fs  %d events", Now(), #recording.events)
+        recordButton:Disable()
+        stopButton:Enable()
+        markButton:Enable()
+    else
+        status:SetText("|cff80ff80IDLE|r")
+        recordButton:Enable()
+        stopButton:Disable()
+        markButton:Disable()
+    end
+end)
