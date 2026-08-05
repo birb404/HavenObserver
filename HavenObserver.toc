@@ -2,7 +2,7 @@
 ## Title: Haven Observer
 ## Notes: Records nearby NPC activity for retail-to-HavenCore research.
 ## Author: Haven Project
-## Version: 0.1.2
+## Version: 0.1.3
 ## SavedVariables: HavenObserverDB
 
 HavenObserver.lua

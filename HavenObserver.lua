@@ -142,7 +142,7 @@ function Observer:Start()
 
     HavenObserverDB = HavenObserverDB or { sessions = {} }
     recording = {
-        version = "0.1.1",
+        version = "0.1.3",
         started = date("%Y-%m-%d %H:%M:%S"),
         startedAt = GetTime(),
         realm = GetRealmName(),
@@ -311,7 +311,7 @@ local function CreateButton(parent, text, width, onClick)
 end
 
 RecorderPanel = CreateFrame("Frame", "HavenObserverRecorderPanel", UIParent, "BackdropTemplate")
-RecorderPanel:SetSize(310, 92)
+RecorderPanel:SetSize(430, 118)
 RecorderPanel:SetPoint("CENTER", UIParent, "CENTER", 0, 220)
 RecorderPanel:SetMovable(true)
 RecorderPanel:EnableMouse(true)
@@ -335,8 +335,13 @@ local status = RecorderPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlight
 status:SetPoint("TOPRIGHT", -12, -14)
 status:SetText("IDLE")
 
+local coordinates = RecorderPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+coordinates:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -7)
+coordinates:SetJustifyH("LEFT")
+coordinates:SetText("Map --  --.--, --.--\nWorld --, --, --")
+
 local recordButton = CreateButton(RecorderPanel, "RECORD 5 MIN", 105, function() Observer:Start() end)
-recordButton:SetPoint("BOTTOMLEFT", 10, 12)
+recordButton:SetPoint("BOTTOMLEFT", 10, 10)
 
 local stopButton = CreateButton(RecorderPanel, "STOP", 80, function() Observer:Stop("panel") end)
 stopButton:SetPoint("LEFT", recordButton, "RIGHT", 5, 0)
@@ -354,6 +359,21 @@ RecorderPanel:SetScript("OnUpdate", function(_, elapsed)
         return
     end
     panelElapsed = 0
+
+    local position = PlayerPosition()
+    local mapX = type(position.mapX) == "number" and position.mapX * 100 or nil
+    local mapY = type(position.mapY) == "number" and position.mapY * 100 or nil
+    if mapX and mapY then
+        coordinates:SetFormattedText(
+            "|cffffd100Map %s|r  %.2f, %.2f\n|cff58c6ffWorld|r %.2f, %.2f, %.2f",
+            tostring(position.mapID or "--"), mapX, mapY,
+            tonumber(position.worldX) or 0, tonumber(position.worldY) or 0, tonumber(position.worldZ) or 0)
+    else
+        coordinates:SetFormattedText(
+            "|cffffd100Map %s|r  --.--, --.--\n|cff58c6ffWorld|r %.2f, %.2f, %.2f",
+            tostring(position.mapID or "--"),
+            tonumber(position.worldX) or 0, tonumber(position.worldY) or 0, tonumber(position.worldZ) or 0)
+    end
 
     if recording then
         status:SetFormattedText("|cffff4040REC|r %05.1fs  %d events", Now(), #recording.events)
