@@ -1,0 +1,5 @@
+<Bindings>
+    <Binding name="HAVENOBSERVER_TOGGLE" header="HAVENOBSERVER">
+        HavenObserver_ToggleRecording()
+    </Binding>
+</Bindings>

@@ -195,6 +195,17 @@ function Observer:Stop(reason)
     lastScreenPosition = {}
 end
 
+BINDING_HEADER_HAVENOBSERVER = "Haven Observer"
+BINDING_NAME_HAVENOBSERVER_TOGGLE = "Start / stop synchronized recording"
+
+function HavenObserver_ToggleRecording()
+    if recording then
+        Observer:Stop("shared hotkey")
+    else
+        Observer:Start()
+    end
+end
+
 local chatEvents = {
     CHAT_MSG_MONSTER_SAY = true,
     CHAT_MSG_MONSTER_YELL = true,

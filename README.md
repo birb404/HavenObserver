@@ -5,10 +5,18 @@ BFA-HavenCore. It does not use GM commands or the HavenCore server bridge.
 
 ## Recording
 
-Close OBS, then double-click `Start-HavenObserver-OBS.bat` in the addon folder.
-It launches OBS with profile `HavenObserver`, collection `Untitled`, scene
-`WOW Retail`, and starts recording immediately. Click HavenObserver's
-`RECORD 5 MIN` button as soon as WoW regains focus.
+Close OBS, then double-click `Start-HavenObserver-OBS.bat` (or the installed
+`HavenObserver OBS.lnk`). It opens profile `HavenObserver`, collection
+`Untitled`, and scene `WOW Retail` without starting either recorder.
+
+For synchronized capture, bind the same unused global key combination in both
+applications, for example `Ctrl+Shift+F9`:
+
+1. WoW: Key Bindings -> AddOns -> Haven Observer -> Start / stop synchronized recording.
+2. OBS: Settings -> Hotkeys -> Start Recording and Stop Recording.
+
+One physical press then reaches OBS and WoW at effectively the same time. Use
+the same key again to stop both.
 
 1. Enable friendly and enemy nameplates.
 2. Place the camera where the complete event is visible and keep it fixed.

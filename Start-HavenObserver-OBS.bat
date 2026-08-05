@@ -24,6 +24,7 @@ if not exist "%OBS_EXE%" (
     exit /b 1
 )
 
-echo Starting OBS Studio and recording the WOW Retail scene...
-start "" /D "%OBS_DIR%" "%OBS_EXE%" --profile "HavenObserver" --collection "Untitled" --scene "WOW Retail" --startrecording
+echo Starting OBS Studio with the WOW Retail scene...
+echo Use the shared HavenObserver/OBS hotkey to start both recordings together.
+start "" /D "%OBS_DIR%" "%OBS_EXE%" --profile "HavenObserver" --collection "Untitled" --scene "WOW Retail"
 exit /b 0
