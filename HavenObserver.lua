@@ -218,14 +218,6 @@ Observer:SetScript("OnEvent", function(self, event, ...)
         visibleUnits[unit] = nil
     elseif event == "PLAYER_TARGET_CHANGED" then
         Add("PLAYER_TARGET", UnitSnapshot("target") or { guid = nil })
-    elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
-        local timestamp, subevent, _, sourceGUID, sourceName, sourceFlags, _, destGUID, destName, destFlags, _, spellID, spellName, spellSchool = CombatLogGetCurrentEventInfo()
-        Add("COMBAT_LOG", {
-            timestamp = Plain(timestamp), subevent = Plain(subevent),
-            sourceGUID = Plain(sourceGUID), sourceNpcId = NpcID(sourceGUID), sourceName = Plain(sourceName), sourceFlags = Plain(sourceFlags),
-            destGUID = Plain(destGUID), destNpcId = NpcID(destGUID), destName = Plain(destName), destFlags = Plain(destFlags),
-            spellID = Plain(spellID), spellName = Plain(spellName), spellSchool = Plain(spellSchool),
-        })
     elseif chatEvents[event] then
         local message, sender, language, channel, target, flags, _, _, _, _, lineID, guid = ...
         Add("NPC_CHAT", {
@@ -260,7 +252,6 @@ Observer:RegisterEvent("PLAYER_LOGIN")
 Observer:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 Observer:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
 Observer:RegisterEvent("PLAYER_TARGET_CHANGED")
-Observer:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 Observer:RegisterEvent("CHAT_MSG_MONSTER_SAY")
 Observer:RegisterEvent("CHAT_MSG_MONSTER_YELL")
 Observer:RegisterEvent("CHAT_MSG_MONSTER_EMOTE")
